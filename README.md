@@ -1,2 +1,2 @@
 # NatalieMonina
-Repository for cantaining projects
+Repository for containing projects
