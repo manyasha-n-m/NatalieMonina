@@ -1,0 +1,6 @@
+laba1/.idea
+laba1/.ipynb_checkpoints
+laba1/venv
+viz/.idea
+viz/venv
+*.csv
