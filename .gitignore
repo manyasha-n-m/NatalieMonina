@@ -4,3 +4,6 @@ laba1/venv
 viz/.idea
 viz/venv
 *.csv
+*.ipynb_checkpoints
+*.zip
+*.txt
