@@ -17,7 +17,8 @@
 import os
 import glob
 import gdal
-import rasterio
+
+gdal.UseExceptions()
 
 os.chdir('AwsData')
 os.system('mkdir a b Kyiv')
@@ -28,36 +29,19 @@ images = {
 for n, i in images.items():
     bands = {}
     for z in [10, 20, 60]:
-        bands[z] = {}
+        bands[z] = []
         ch = ['_B02_', '_B03_', '_B04_', '_B08_']
-        for file in os.listdir(i.format(z)):
-            for c in ch:
-                if c in file:
-                    os.system('echo '+file)
-                    bands[z][c] = rasterio.open(i.format(z) + file, driver="JP2OpenJPEG")
-                    break
-        # merging
-        merged = rasterio.open('{}/{}_{}.tiff'.format(n, n, z), 'w', driver='Gtiff',
-                               width=bands[z]['_B02_'].width,
-                               height=bands[z]['_B02_'].height,
-                               count=4,
-                               transform=bands[z]['_B02_'].transform,
-                               dtype=bands[z]['_B02_'].dtypes[0])
-        count = 0
-        for c, b in bands[z].items():
-            count += 1
-            merged.write(b.read(1), count)
-        merged.close()
+        a = i.format(z)
+        if z==10:
+            os.system("gdal_merge.py -o {}/{}_{}.tiff -separate -of Gtiff {}*_B02*.jp2 {}*_B03*.jp2 {}*_B04*.jp2 {}*_B08*.jp2".format(n,n,z,a,a,a,a))
+        else:
+            os.system("gdal_merge.py -o {}/{}_{}.tiff -separate -of Gtiff {}*_B02*.jp2 {}*_B03*.jp2 {}*_B04*.jp2".format(n,n,z,a,a,a))
 
-        # reprojection
-        gdal.Warp('{}/{}_{}_4326.tiff'.format(n, n, z),
-                  '{}/{}_{}.tiff'.format(n, n, z),
-                  dstSRS='EPSG:4326')
-
-os.system('gdal_merge.py -o b/b.tiff -of Gtiff b/b*4326.tiff')
-os.system('gdal_merge.py -o a/a.tiff -of Gtiff a/a*4326.tiff')
-
-VRT = gdal.BuildVRT("Kyiv/Kyiv_obl.vrt", ["a/a.tiff", "b/b.tiff"])
+VRT = gdal.BuildVRT("Kyiv/Kyiv_obl.vrt", ["a/a_10.tiff", "b/b_10.tiff"])
 gdal.Translate("Kyiv/Kyiv_obl.tiff", VRT)
 
-os.system("gdalwarp -dstnodata -9999 -t_srs EPSG:4326 -q -cutline border/Kyiv_regions.shp -crop_to_cutline -of Gtiff Kyiv/Kyiv_obl.tiff Kyiv/Kyiv.tiff")
+gdal.Warp('Kyiv/Kyiv_obl_4326.tiff',
+          'Kyiv/Kyiv_obl.tiff',
+          dstSRS='EPSG:4326')
+
+gdal.Warp('Kyiv/Kyiv.tiff', 'Kyiv/Kyiv_obl_4326.tiff', cutlineDSName='border/Kyiv_regions.shp', cropToCutline=True)
