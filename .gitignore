@@ -7,3 +7,4 @@ viz/venv
 *.ipynb_checkpoints
 *.zip
 *.txt
+*.idea
