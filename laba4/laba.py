@@ -60,4 +60,4 @@ os.system('gdal_merge.py -o a/a.tiff -of Gtiff a/a*4326.tiff')
 VRT = gdal.BuildVRT("Kyiv/Kyiv_obl.vrt", ["a/a.tiff", "b/b.tiff"])
 gdal.Translate("Kyiv/Kyiv_obl.tiff", VRT)
 
-os.system("gdalwarp -dstnodata -9999 -t_srs EPSG:4326 -q -cutline border/Kyiv_regions.shp -crop_to_cutline -of Gtiff Kyiv/Kyiv_obl.tiff Kyiv/Kyiv.tiff")
+os.system("gdalwarp -t_srs EPSG:4326 -q -cutline border/Kyiv_regions.shp -crop_to_cutline -of Gtiff Kyiv/Kyiv_obl.tiff Kyiv/Kyiv.tiff")
